@@ -1,0 +1,16 @@
+Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Air/Ground
+SCV,S,5,0,0,0,N,-,60,0,0,0,no,ground
+Marine,S,6,6,1,1,N,N,40,0,0,0,no,ground
+Firebat,S,16,0,2,0,C,-,50,0,1,0,yes,ground
+Medic,S,0,0,0,0,-,-,60,0,1,0,no,ground
+Ghost,S,10,10,1,1,C,C,45,0,0,0,no,ground
+Vulture,M,20,0,2,2,C,-,80,0,0,0,no,ground
+Siege Tank,L,30,0,3,3,E,-,150,0,1,0,no,ground
+Siege Tank - Siege,L,70,0,5,5,E,-,150,0,1,0,yes,ground
+Goliath,L,12,20,1,4,N,E,125,0,1,0,no,ground
+Wraith,L,8,20,0,0,N,E,120,0,0,0,no,air
+Dropship,L,0,0,0,0,-,-,150,0,1,0,no,air
+Valkyrie,L,0,6,0,1,-,E,200,0,2,0,yes,air
+Science Vessel,L,0,0,0,0,-,-,200,0,1,0,no,air
+Battlecruiser,L,25,25,3,3,N,N,500,0,3,0,no,air
+Missile Turret,L,0,20,0,0,-,E,200,0,0,0,no,ground

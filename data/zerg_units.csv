@@ -1,0 +1,16 @@
+Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Air/Ground
+Drone,S,5,0,0,0,N,-,40,0,0,0,no,ground
+Zergling,S,5,0,1,0,N,-,35,0,0,0,no,ground
+Hydralisk,M,10,10,1,1,E,E,80,0,0,0,no,ground
+Lurker,M,20,0,2,0,N,-,125,0,1,0,yes,ground
+Defiler,M,0,0,0,0,-,-,80,0,1,0,no,ground
+Ultralisk,L,20,0,3,0,N,-,400,0,1,0,no,ground
+Infested Terran,S,500,0,0,0,E,-,60,0,0,0,yes,ground
+Mutalisk,S,9,9,1,1,N,N,120,0,0,0,yes,air
+Scourge,S,0,110,0,0,-,N,25,0,0,0,no,air
+Guardian,L,20,0,2,0,N,-,150,0,2,0,no,air
+Devourer,L,0,25,0,2,-,E,250,0,2,0,yes,air
+Queen,M,0,0,0,0,-,-,120,0,0,0,no,air
+Overlord,L,0,6,0,0,-,-,200,0,0,0,no,air
+Spore Colony,L,0,15,0,0,-,N,400,0,0,0,no,ground
+Sunken Colony,L,40,0,0,0,E,-,300,0,2,0,no,ground
