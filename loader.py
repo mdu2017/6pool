@@ -1,28 +1,23 @@
 import csv
-from unit import Unit
-
+import pandas as pd
 
 def load_data():
-    protoss_units = []
-    zerg_units = []
-    terran_units = []
+    # Dataframes
+    terran_units = pd.read_csv('./data/terran_units.csv', sep=',', header=0)
+    zerg_units = pd.read_csv('./data/zerg_units.csv', sep=',', header=0)
+    protoss_units = pd.read_csv('./data/protoss_units.csv', sep=',', header=0)
 
-    with open('./data/protoss_units.csv') as protoss_file:
-        reader = csv.reader(protoss_file)
-        next(reader)
-        for line in csv.reader(protoss_file):
-            protoss_units.append(Unit(line))
+    # Join into 1 large list for info table
+    all_units = pd.concat(
+        [terran_units, zerg_units, protoss_units],
+        axis=0,
+        join="outer",
+        ignore_index=True,
+        keys=None,
+        levels=None,
+        names=None,
+        verify_integrity=False,
+        copy=True,
+    )
 
-    with open('./data/zerg_units.csv') as zerg_file:
-        reader = csv.reader(zerg_file)
-        next(reader)
-        for line in csv.reader(zerg_file):
-            zerg_units.append(Unit(line))
-
-    with open('./data/terran_units.csv') as terran_file:
-        reader = csv.reader(terran_file)
-        next(reader)
-        for line in csv.reader(terran_file):
-            terran_units.append(Unit(line))
-
-    return protoss_units, zerg_units, terran_units
+    return terran_units, zerg_units, protoss_units, all_units

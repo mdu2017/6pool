@@ -11,6 +11,6 @@ Scourge,S,0,110,0,0,-,N,25,0,0,0,no,air
 Guardian,L,20,0,2,0,N,-,150,0,2,0,no,air
 Devourer,L,0,25,0,2,-,E,250,0,2,0,yes,air
 Queen,M,0,0,0,0,-,-,120,0,0,0,no,air
-Overlord,L,0,6,0,0,-,-,200,0,0,0,no,air
+Overlord,L,0,0,0,0,-,-,200,0,0,0,no,air
 Spore Colony,L,0,15,0,0,-,N,400,0,0,0,no,ground
 Sunken Colony,L,40,0,0,0,E,-,300,0,2,0,no,ground

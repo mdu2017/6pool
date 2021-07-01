@@ -5,34 +5,24 @@ import pandas as pd
 import numpy as np
 from altair import datum
 from vega_datasets import data
+import graphs
+import loader
+import damage
 
 if __name__ == '__main__':
 
-    CHART_WIDTH = 700
-    CHART_HEIGHT = 550
+    # Load in dataset
+    terran_units, zerg_units, protoss_units, all_units = loader.load_data()
 
-    # Dataframes
-    terran_units = pd.read_csv('./data/terran_units.csv', sep=',', header=0)
-    zerg_units = pd.read_csv('./data/zerg_units.csv', sep=',', header=0)
-    protoss_units = pd.read_csv('./data/protoss_units.csv', sep=',', header=0)
+    # Process damages
+    damage.process_damage(terran_units)
+    damage.process_damage(zerg_units)
+    damage.process_damage(protoss_units)
 
-    # Join into 1 large list for info table
-    all_units = pd.concat(
-        [terran_units, zerg_units, protoss_units],
-        axis=0,
-        join="outer",
-        ignore_index=True,
-        keys=None,
-        levels=None,
-        names=None,
-        verify_integrity=False,
-        copy=True,
-    )
-
-    st.title('Starcraft Unit Damage Stats')
+    st.title('Starcraft Unit Damage Charts')
 
     # TODO: Selectbox for mode (Damage charts, Damage Against, Table format)
-    st.sidebar.selectbox(
+    chart_mode = st.sidebar.selectbox(
         label='Select Chart Mode',
         options=['Damage Charts', 'Damage Against', 'Table Format']
     )
@@ -50,69 +40,42 @@ if __name__ == '__main__':
         label='Select Unit Race',
         options=['Terran', 'Zerg', 'Protoss'])
 
-    if unit_race == 'Terran':
+    # Damage Charts mode
+    if chart_mode == 'Damage Charts':
 
+        # Display ground/air options
         ga_choice = st.radio(
             label='Select Ground/Air Attacks',
             options=['Ground', 'Air']
         )
 
-        # TODO: damage calculations for different enemy sizes
+        # Unit size option
         unit_size_choice = st.select_slider(
             label=f'Select Enemy Unit Size - Damage Against',
             options=['Base', 'Small', 'Medium', 'Large']
         )
 
+        # Generate damage charts for terran units
+        if unit_race == 'Terran':
+            graphs.draw_chart(terran_units, ga_choice, unit_size_choice)
 
-        # Set y axis based on ground/air option selected
-        if ga_choice == 'Ground':
-            y = alt.Y(field='Ground Attack', title='Ground Attack Value', type='quantitative', sort='-y')
-            field_predicate = alt.FieldGTPredicate(field='Ground Attack', gt=1)
-        else:
-            y = alt.Y(field='Air Attack', title='Air Attack Value', type='quantitative', sort='-y')
-            field_predicate = alt.FieldGTPredicate(field='Air Attack', gt=1)
+            # Note for special terran units
+            if ga_choice == 'Air':
+                st.info('Note: Valkyries shoot 2 groups of 4 missiles for a total of 6 (x8) damage')
 
-        # Create damage chart
-        chart = alt.Chart(data=terran_units).mark_bar().encode(
-            x=alt.X(field='Unit Name', title='Unit Name', type='nominal'),
-            y=y,
-            color=alt.condition(
-                alt.FieldEqualPredicate(field='Unit Name', equal='Valkyrie'),
-                alt.value('coral'),  # which sets the bar orange.
-                alt.value('steelblue')  # And if it's not true it sets the bar steelblue.
-            )
-        ).transform_filter(
-            field_predicate
-        )
+        # Charts for zerg units
+        elif unit_race == 'Zerg':
+            graphs.draw_chart(zerg_units, ga_choice, unit_size_choice)
 
-        # Bar chart labels
-        text = chart.mark_text(
-            align='center',
-            baseline='middle',
-            dy=-5
-        ).encode(
-            text=y.field  # This has to match a column name
-        )
+        # Charts for protoss units
+        elif unit_race == 'Protoss':
+            graphs.draw_chart(protoss_units, ga_choice, unit_size_choice)
 
-        # Add base chart and text to layered chart for labels
-        my_chart = alt.layer(chart, text, data=terran_units).properties(
-            width=CHART_WIDTH,
-            height=CHART_HEIGHT
-        ).configure_axis(       # Need to run configure_axis() on last chart b/c of config issue
-            labelFontSize=16,
-            titleFontSize=18
-        )
+    elif chart_mode == 'Damage Against':
+        print()
+    elif chart_mode == 'Table Format':
+        print()
 
-        # Display chart to page
-        st.altair_chart(altair_chart=my_chart, use_container_width=True)
-
-        if ga_choice == 'Air':
-            st.info('Note: Valkyries shoot 2 groups of 4 missiles for a total of 6 (x8) damage')
-
-    elif unit_race == 'Zerg':
-        st.write(zerg_units)
-    elif unit_race == 'Protoss':
-        st.write(protoss_units)
 
 # Adjusted damage value based on attack types
 def adjusted_damage():
