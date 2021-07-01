@@ -37,7 +37,7 @@ if __name__ == '__main__':
         options=['Damage Charts', 'Damage Against', 'Table Format']
     )
 
-    # TODO: Display unit info table
+    # Display unit info table
     display_unit_info = st.sidebar.checkbox(
         label='Display unit info',
         help='Displays info table for all units'
