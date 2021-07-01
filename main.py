@@ -19,12 +19,10 @@ if __name__ == '__main__':
     damage.process_damage(zerg_units)
     damage.process_damage(protoss_units)
 
-    st.title('Starcraft Unit Damage Charts')
-
     # TODO: Selectbox for mode (Damage charts, Damage Against, Table format)
     chart_mode = st.sidebar.selectbox(
         label='Select Chart Mode',
-        options=['Damage Charts', 'Damage Against', 'Table Format']
+        options=['Damage Charts', 'Unit Statistics', 'Table Format']
     )
 
     # Display unit info table
@@ -42,6 +40,7 @@ if __name__ == '__main__':
 
     # Damage Charts mode
     if chart_mode == 'Damage Charts':
+        st.title('Starcraft Unit Damage Charts')
 
         # Display ground/air options
         ga_choice = st.radio(
@@ -71,8 +70,20 @@ if __name__ == '__main__':
         elif unit_race == 'Protoss':
             graphs.draw_chart(protoss_units, ga_choice, unit_size_choice)
 
-    elif chart_mode == 'Damage Against':
-        print()
+    elif chart_mode == 'Unit Statistics':
+        st.title('Unit Statistics - Hits to Kill')
+        if unit_race == 'Terran':
+            options = terran_units['Unit Name']
+        elif unit_race == 'Zerg':
+            options = zerg_units['Unit Name']
+        elif unit_race == 'Protoss':
+            options = protoss_units['Unit Name']
+
+        unit_selected = st.sidebar.selectbox(
+            label='Select Unit',
+            options=options
+        )
+
     elif chart_mode == 'Table Format':
         print()
 
