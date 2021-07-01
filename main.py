@@ -30,8 +30,6 @@ if __name__ == '__main__':
         label='Display unit info',
         help='Displays info table for all units'
     )
-    if display_unit_info:
-        st.write(all_units)
 
     # Sidebar choice option for unit race
     unit_race = st.sidebar.radio(
@@ -41,6 +39,9 @@ if __name__ == '__main__':
     # Damage Charts mode
     if chart_mode == 'Damage Charts':
         st.title('Starcraft Unit Damage Charts')
+
+        if display_unit_info:
+            st.write(all_units)
 
         # Display ground/air options
         ga_choice = st.radio(
@@ -72,6 +73,10 @@ if __name__ == '__main__':
 
     elif chart_mode == 'Unit Statistics':
         st.title('Unit Statistics - Hits to Kill')
+
+        if display_unit_info:
+            st.write(all_units)
+
         if unit_race == 'Terran':
             options = terran_units['Unit Name']
         elif unit_race == 'Zerg':
@@ -86,6 +91,8 @@ if __name__ == '__main__':
 
     elif chart_mode == 'Table Format':
         print()
+        if display_unit_info:
+            st.write(all_units)
 
 
 # Adjusted damage value based on attack types
