@@ -1,4 +1,4 @@
-Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Air/Ground
+Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Status
 Probe,S,5,0,0,0,N,-,20,20,0,0,no,ground
 Zealot,S,16,0,2,0,N,-,100,60,1,0,no,ground
 Dragoon,L,20,20,2,2,E,E,100,80,1,0,no,ground

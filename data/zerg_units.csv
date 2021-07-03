@@ -1,4 +1,4 @@
-Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Air/Ground
+Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Status
 Drone,S,5,0,0,0,N,-,40,0,0,0,no,ground
 Zergling,S,5,0,1,0,N,-,35,0,0,0,no,ground
 Hydralisk,M,10,10,1,1,E,E,80,0,0,0,no,ground

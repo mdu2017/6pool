@@ -74,20 +74,48 @@ if __name__ == '__main__':
     elif chart_mode == 'Unit Statistics':
         st.title('Unit Statistics - Hits to Kill')
 
+        # Display data table of units
         if display_unit_info:
             st.write(all_units)
 
+        # Filter units by race
         if unit_race == 'Terran':
-            options = terran_units['Unit Name']
+            filtered_units = terran_units[(terran_units['Ground Attack'] > 0) | (terran_units['Air Attack'] > 0)]
         elif unit_race == 'Zerg':
-            options = zerg_units['Unit Name']
+            filtered_units = zerg_units[(zerg_units['Ground Attack'] > 0) | (zerg_units['Air Attack'] > 0)]
         elif unit_race == 'Protoss':
-            options = protoss_units['Unit Name']
+            filtered_units = protoss_units[(protoss_units['Ground Attack'] > 0) | (protoss_units['Air Attack'] > 0)]
 
-        unit_selected = st.sidebar.selectbox(
-            label='Select Unit',
-            options=options
-        )
+        filtered_units.reset_index(drop=True, inplace=True)  # Need to reset index after filtering, or throws key error
+        options = filtered_units['Unit Name']
+
+        # Unit selected on sidebar choice
+        unit_selected = st.sidebar.selectbox(label='Select Unit', options=options)
+
+        # Main page section
+        enemy_unit_race = st.radio(label='Select Enemy Unit Race', options=['Terran', 'Zerg','Protoss'])
+
+        # Selected weapon and armor upgrade levels
+        weapon_level = st.select_slider(label='Weapon upgrade level', options=['0', '1', '2', '3'])
+        armor_level = st.select_slider(label='Enemy armor level', options=['0', '1', '2', '3'])
+
+        # Chart choice option
+        chart_option = st.radio(label='Show: ', options=['Hits To Kill', 'Damage Against'])
+
+        if enemy_unit_race == 'Terran':
+            curr_unit = terran_units[terran_units['Unit Name'] == unit_selected]
+            graphs.draw_HTK_chart(curr_unit, terran_units, weapon_level, armor_level, '0')
+        elif enemy_unit_race == 'Zerg':
+            st.write('zerg')
+        elif enemy_unit_race == 'Protoss':
+            shield_level = st.select_slider(
+                label='Enemy shield level', options=['0', '1', '2', '3']
+            )
+            st.write('Protoss')
+
+
+        # Below Graph:
+        st.info('note below graph')
 
     elif chart_mode == 'Table Format':
         print()

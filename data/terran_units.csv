@@ -1,4 +1,4 @@
-Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Air/Ground
+Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Status
 SCV,S,5,0,0,0,N,-,60,0,0,0,no,ground
 Marine,S,6,6,1,1,N,N,40,0,0,0,no,ground
 Firebat,S,16,0,2,0,C,-,50,0,1,0,yes,ground
