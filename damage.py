@@ -81,6 +81,9 @@ def damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_l
     :return: dataframe with [unit names, hits_to_kill]
     """
 
+    # Check if protoss for shield calculations
+    is_protoss = (enemy_unit_list.iloc[0]['Unit Name'] == 'Probe')
+
     # Get ground and air attack values
     ga_value = curr_unit.iloc[0]['Ground Attack']
     aa_value = curr_unit.iloc[0]['Air Attack']
@@ -93,21 +96,30 @@ def damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_l
     else:
         enemy_units = enemy_unit_list
 
+    enemy_unit_names = []
+    damage_to_hp = []
+    damage_to_shield = []
 
-    # For each enemy unit, calculate damage against, factoring in weapon/armor ups, health/shields (ignore regen)
-    #  dmg_to_hp = attack damage + (weapon level * attack mod) - (Enemy armor + armor level)
-    #  dmg_to_shields = atk dmg + (wpn lvl * attack mod) - (shield level)
-    #   total_htk = (dmg_to_shields / total_Shields) + (dmg_to_hp / hp)
+    # Calculate damage against enemy unit and create lists for each stat
+    for enemy_unit in enemy_units.itertuples(index=False, name='Unit'):
+        enemy_name, damage_to_h, damage_to_s = calculate_dmg(curr_unit, int(c_weapon_lvl),
+                enemy_unit, int(e_armor_lvl), int(e_shield_lvl), is_protoss)
+        enemy_unit_names.append(enemy_name)
+        damage_to_hp.append(damage_to_h)
+        damage_to_shield.append(damage_to_s)
 
-    for enemy_unit in enemy_units:
-        temp = calculate_dmg(curr_unit, int(c_weapon_lvl), enemy_unit, int(e_armor_lvl), int(e_shield_lvl))
-        print(temp)
+    unit_vs = pd.DataFrame()
+    unit_vs['Enemy Unit Name'] = pd.Series(data=enemy_unit_names)
+    unit_vs['Damage To HP'] = pd.Series(data=damage_to_hp)
+    unit_vs['Damage To Shields'] = pd.Series(damage_to_shield)
+
+    return unit_vs
 
 
-
-def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, enemy_shield_level):
+def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, enemy_shield_level, is_protoss):
     """
     Calculates damages against another unit
+    :param is_protoss: is protoss unit
     :param curr_unit: selected unit
     :param curr_weapon_level: current weapon level upgrade
     :param enemy_unit: enemy unit to compare against
@@ -116,31 +128,76 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
     :return: damage to enemy unit
     """
 
-    # print(curr_unit)
-    print(enemy_unit)
+    # Grab enemy unit props
+    enemy_unit_name = enemy_unit[0]
+    enemy_unit_size = enemy_unit[1]
+    enemy_hp = enemy_unit[8]
+    enemy_armor = enemy_unit[10]
+    enemy_status = enemy_unit[13]
 
-    # Take ground and air damage
-    # unit_ga_value = curr_unit.iloc[0]['Ground Attack']
-    # unit_aa_value = curr_unit.iloc[0]['Air Attack']
-    #
-    # unit_ga_mod = curr_unit.iloc[0]['Ground Attack Mod']
-    # unit_aa_mod = curr_unit.iloc[0]['Air Attack Mod']
-    #
-    # unit_gdmg = unit_ga_value + (curr_weapon_level * unit_ga_mod)
-    # unit_admg = unit_aa_value + (curr_weapon_level * unit_aa_mod)
-    #
-    # # Enemy armor
-    # enemy_armor_value = (enemy_unit.iloc[0]['Armor'] + enemy_armor_level)
-    # enemy_shield_value = (enemy_unit.iloc[0]['Shield Armor'] + enemy_shield_level)
-    #
-    # # Calculate damages for ground attacks
-    # ground_dmg_to_hp = (unit_gdmg - enemy_armor_value)
-    # ground_dmg_to_shield = (unit_gdmg - enemy_shield_value)
-    #
-    # # Calculate damages for air atttacks
-    # air_dmg_to_hp = (unit_admg - enemy_armor_value)
-    # air_dmg_to_shield = (unit_admg - enemy_shield_value)
-    #
-    # # return tuple of values
-    # true_dmg_values = (ground_dmg_to_hp, ground_dmg_to_shield, air_dmg_to_hp, air_dmg_to_shield)
-    # return true_dmg_values
+    # Calculate ground and air damage with upgrades
+    unit_ga_value = curr_unit.iloc[0]['Ground Attack']
+    unit_aa_value = curr_unit.iloc[0]['Air Attack']
+
+    # Enemy armor value
+    enemy_armor_value = (enemy_armor + enemy_armor_level)
+
+    # NOTE: ARMOR is factored in first, THEN unit size modifiers
+    #  ex: (22 damage - 1 armor) * 0.5 damage
+
+
+    # Calculate air/ground damage as needed
+    if unit_aa_value != 0:
+        aa_type = curr_unit.iloc[0]['Air Attack Type']
+        unit_aa_mod = curr_unit.iloc[0]['Air Attack Mod']
+        unit_admg = unit_aa_value + (curr_weapon_level * unit_aa_mod)
+        air_dmg_to_hp = (unit_admg - enemy_armor_value)
+
+        if aa_type == 'C':
+            if enemy_unit_size == 'M':
+                air_dmg_to_hp *= CONCUSSIVE_MEDIUM_MOD
+            elif enemy_unit_size == 'L':
+                air_dmg_to_hp *= CONCUSSIVE_LARGE_MOD
+        if aa_type == 'E':
+            if enemy_unit_size == 'S':
+                air_dmg_to_hp *= EXPLOSIVE_SMALL_MOD
+            elif enemy_unit_size == 'M':
+                air_dmg_to_hp *= EXPLOSIVE_MEDIUM_MOD
+
+    if unit_ga_value != 0:
+        ga_type = curr_unit.iloc[0]['Ground Attack Type']
+        unit_ga_mod = curr_unit.iloc[0]['Ground Attack Mod']
+        unit_gdmg = unit_ga_value + (curr_weapon_level * unit_ga_mod)
+        ground_dmg_to_hp = (unit_gdmg - enemy_armor_value)
+
+        if ga_type == 'C':
+            if enemy_unit_size == 'M':
+                ground_dmg_to_hp *= CONCUSSIVE_MEDIUM_MOD
+            elif enemy_unit_size == 'L':
+                ground_dmg_to_hp *= CONCUSSIVE_LARGE_MOD
+        if ga_type == 'E':
+            if enemy_unit_size == 'S':
+                ground_dmg_to_hp *= EXPLOSIVE_SMALL_MOD
+            elif enemy_unit_size == 'M':
+                ground_dmg_to_hp *= EXPLOSIVE_MEDIUM_MOD
+
+    # Do shield calculations if protoss
+    if is_protoss:
+        enemy_shields = enemy_unit[9]
+        enemy_shield_value = enemy_shield_level
+
+        if unit_ga_value != 0:
+            ground_dmg_to_shield = (unit_gdmg - enemy_shield_value)
+        if unit_aa_value != 0:
+            air_dmg_to_shield = (unit_admg - enemy_shield_value)
+
+        if enemy_status == 'ground':
+            return enemy_unit_name, ground_dmg_to_hp, ground_dmg_to_shield
+        else:
+            return enemy_unit_name, air_dmg_to_hp, air_dmg_to_shield
+    else:
+        # Return damage against for ground/air based on enemy status
+        if enemy_status == 'ground':
+            return enemy_unit_name, ground_dmg_to_hp, 0
+        else:
+            return enemy_unit_name, air_dmg_to_hp, 0

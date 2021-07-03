@@ -14,7 +14,6 @@ CHART_HEIGHT = 550
 CHART_FONT_SIZE = 16
 CHART_LABEL_SIZE = 18
 
-
 # Base function for drawing chart
 def draw_chart(unit_list, ga_choice, unit_size):
     # Set y axis field name based on ground and size option
@@ -79,15 +78,16 @@ def draw_chart(unit_list, ga_choice, unit_size):
 
 # Drawk hits-to-kill chart for unit
 def draw_HTK_chart(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl):
-    # damage.damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl)
-    print()
+    unit_vs = damage.damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl)
+
+    st.write(unit_vs)
 
 
 if __name__ == "__main__":
-    terran_units, _, _, _ = loader.load_data()
+    terran_units, zerg_units, protoss_units, _ = loader.load_data()
     damage.process_damage(terran_units)
 
     # damage.process_damage(terran_units)
-    unit = terran_units[terran_units['Unit Name'] == 'Marine']
-    result = damage.damage_HTK(unit, terran_units, '0', '0', '0')
+    unit = terran_units[terran_units['Unit Name'] == 'Vulture']
+    result = damage.damage_HTK(unit, zerg_units, '0', '3', '0')
     # print(result)
