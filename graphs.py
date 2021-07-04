@@ -77,17 +77,87 @@ def draw_chart(unit_list, ga_choice, unit_size):
 
 
 # Drawk hits-to-kill chart for unit
-def draw_HTK_chart(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl):
-    unit_vs = damage.damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl)
+def draw_unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl):
+    # Check if protoss for shield calculations
+    is_protoss = (enemy_unit_list.iloc[0]['Unit Name'] == 'Probe')
 
-    st.write(unit_vs)
+    unit_vs = damage.unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl, is_protoss)
+
+    # TODO: add protoss option to show damage to shields
+    if is_protoss:
+        # add shield option
+        None
+
+    # Create graph
+    chart = alt.Chart(data=unit_vs).mark_bar().encode(
+        x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal'),
+        y=alt.Y(field='Damage To HP', title='Damage to HP', type='quantitative'),
+    )
+
+    # Bar chart labels
+    text = chart.mark_text(
+        align='center',
+        baseline='middle',
+        dy=-5
+    ).encode(
+        text='Damage To HP'  # This has to match a column name
+    )
+
+    # Add base chart and text to layered chart for labels
+    unit_vs_chart = alt.layer(chart, text, data=unit_vs).properties(
+        width=CHART_WIDTH,
+        height=CHART_HEIGHT
+    ).configure_axis(  # Need to run configure_axis() on last chart b/c of config issue
+        labelFontSize=CHART_LABEL_SIZE,
+        titleFontSize=CHART_FONT_SIZE
+    )
+
+    # Display chart to page
+    st.altair_chart(altair_chart=unit_vs_chart, use_container_width=True)
+
+def draw_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl):
+    # Check if protoss for shield calculations
+    is_protoss = (enemy_unit_list.iloc[0]['Unit Name'] == 'Probe')
+
+    unit_vs = damage.unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl, is_protoss)
+    unit_HTK = damage.calculate_HTK(unit_vs)
+
+    # Create graph
+    chart = alt.Chart(data=unit_HTK).mark_bar().encode(
+        x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal'),
+        y=alt.Y(field='Hits To Kill', title='Damage to HP', type='quantitative'),
+    )
+
+    # Bar chart labels
+    text = chart.mark_text(
+        align='center',
+        baseline='middle',
+        dy=-5
+    ).encode(
+        text='Hits To Kill'  # This has to match a column name
+    )
+
+    # Add base chart and text to layered chart for labels
+    unit_HTK_chart = alt.layer(chart, text, data=unit_HTK).properties(
+        width=CHART_WIDTH,
+        height=CHART_HEIGHT
+    ).configure_axis(  # Need to run configure_axis() on last chart b/c of config issue
+        labelFontSize=CHART_LABEL_SIZE,
+        titleFontSize=CHART_FONT_SIZE
+    )
+
+    # Display chart to page
+    st.altair_chart(altair_chart=unit_HTK_chart, use_container_width=True)
 
 
+# Used for debugging
 if __name__ == "__main__":
     terran_units, zerg_units, protoss_units, _ = loader.load_data()
     damage.process_damage(terran_units)
 
     # damage.process_damage(terran_units)
-    unit = terran_units[terran_units['Unit Name'] == 'Vulture']
-    result = damage.damage_HTK(unit, zerg_units, '0', '3', '0')
-    # print(result)
+    unit = zerg_units[zerg_units['Unit Name'] == 'Sunken Colony']
+    result = damage.unit_vs(unit, protoss_units, '0', '0', '0', True)
+    enemy_htk = damage.calculate_HTK(result)
+
+    print(enemy_htk)

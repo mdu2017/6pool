@@ -91,26 +91,36 @@ if __name__ == '__main__':
         # Selected weapon and armor upgrade levels
         weapon_level = st.select_slider(label='Weapon upgrade level', options=['0', '1', '2', '3'])
         armor_level = st.select_slider(label='Enemy armor level', options=['0', '1', '2', '3'])
+        if enemy_unit_race == 'Protoss':
+            shield_level = st.select_slider(
+                label='Enemy shield level', options=['0', '1', '2', '3']
+            )
 
         # Chart choice option
         chart_option = st.radio(label='Show: ', options=['Damage Against', 'Hits to Kill'])
 
-        if enemy_unit_race == 'Terran':
-            st.write(curr_unit)
-            graphs.draw_HTK_chart(curr_unit, terran_units, weapon_level, armor_level, '0')
-        elif enemy_unit_race == 'Zerg':
-            st.write(curr_unit)
-            # graphs.draw_HTK_chart(curr_unit, zerg_units, weapon_level, armor_level, '0')
-        elif enemy_unit_race == 'Protoss':
-            shield_level = st.select_slider(
-                label='Enemy shield level', options=['0', '1', '2', '3']
-            )
-            st.write(curr_unit)
-            # graphs.draw_HTK_chart(curr_unit, protoss_units, weapon_level, armor_level, shield_level)
+        st.subheader(f'{unit_selected} vs {enemy_unit_race} Units')
+
+        if chart_option == 'Damage Against':
+            if enemy_unit_race == 'Terran':
+                graphs.draw_unit_vs(curr_unit, terran_units, weapon_level, armor_level, '0')
+            elif enemy_unit_race == 'Zerg':
+                graphs.draw_unit_vs(curr_unit, zerg_units, weapon_level, armor_level, '0')
+            elif enemy_unit_race == 'Protoss':
+                graphs.draw_unit_vs(curr_unit, protoss_units, weapon_level, armor_level, shield_level)
+        elif chart_option == 'Hits to Kill':
+            if enemy_unit_race == 'Terran':
+                graphs.draw_HTK(curr_unit, terran_units, weapon_level, armor_level, '0')
+                st.info('Note: Terran Units can be healed/repaired')
+            elif enemy_unit_race == 'Zerg':
+                graphs.draw_HTK(curr_unit, zerg_units, weapon_level, armor_level, '0')
+                st.info('Note: Zerg units have health regeneration, which may affect these numbers')
+            elif enemy_unit_race == 'Protoss':
+                graphs.draw_HTK(curr_unit, protoss_units, weapon_level, armor_level, shield_level)
+                st.info('Note: Protoss units have shield regeneration, which may affect these numbers')
 
 
-        # Below Graph:
-        st.info('note below graph')
+
 
     elif chart_mode == 'Table Format':
         print()

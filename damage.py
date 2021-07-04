@@ -3,6 +3,7 @@ File that handles damage calculations for various units
 """
 
 import pandas as pd
+import math
 
 # Modifiers for special damage types
 CONCUSSIVE_MEDIUM_MOD = 0.5
@@ -70,7 +71,7 @@ def process_damage(unit_list):
     unit_list['Air vs Large'] = pd.Series(data=alarge)
 
 
-def damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl):
+def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl, is_protoss):
     """
     Calculate hits-to-kill for each unit in the list
     :param e_shield_lvl: enemy shield upgrade level
@@ -80,9 +81,6 @@ def damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_l
     :param curr_unit: unit selected
     :return: dataframe with [unit names, hits_to_kill]
     """
-
-    # Check if protoss for shield calculations
-    is_protoss = (enemy_unit_list.iloc[0]['Unit Name'] == 'Probe')
 
     # Get ground and air attack values
     ga_value = curr_unit.iloc[0]['Ground Attack']
@@ -98,20 +96,27 @@ def damage_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_l
 
     enemy_unit_names = []
     damage_to_hp = []
-    damage_to_shield = []
+    damage_to_shields = []
+    enemy_hp = []
+    enemy_shields = []
 
     # Calculate damage against enemy unit and create lists for each stat
     for enemy_unit in enemy_units.itertuples(index=False, name='Unit'):
-        enemy_name, damage_to_h, damage_to_s = calculate_dmg(curr_unit, int(c_weapon_lvl),
-                enemy_unit, int(e_armor_lvl), int(e_shield_lvl), is_protoss)
+        enemy_name, damage_to_h, damage_to_s, e_hp, e_shields = calculate_dmg(curr_unit, int(c_weapon_lvl),
+                                                                              enemy_unit, int(e_armor_lvl),
+                                                                              int(e_shield_lvl), is_protoss)
         enemy_unit_names.append(enemy_name)
         damage_to_hp.append(damage_to_h)
-        damage_to_shield.append(damage_to_s)
+        damage_to_shields.append(damage_to_s)
+        enemy_hp.append(e_hp)
+        enemy_shields.append(e_shields)
 
     unit_vs = pd.DataFrame()
     unit_vs['Enemy Unit Name'] = pd.Series(data=enemy_unit_names)
     unit_vs['Damage To HP'] = pd.Series(data=damage_to_hp)
-    unit_vs['Damage To Shields'] = pd.Series(damage_to_shield)
+    unit_vs['Damage To Shields'] = pd.Series(data=damage_to_shields)
+    unit_vs['HP'] = pd.Series(data=enemy_hp)
+    unit_vs['Shields'] = pd.Series(data=enemy_shields)
 
     return unit_vs
 
@@ -144,7 +149,6 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
 
     # NOTE: ARMOR is factored in first, THEN unit size modifiers
     #  ex: (22 damage - 1 armor) * 0.5 damage
-
 
     # Calculate air/ground damage as needed
     if unit_aa_value != 0:
@@ -192,12 +196,59 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
             air_dmg_to_shield = (unit_admg - enemy_shield_value)
 
         if enemy_status == 'ground':
-            return enemy_unit_name, ground_dmg_to_hp, ground_dmg_to_shield
+            return enemy_unit_name, ground_dmg_to_hp, ground_dmg_to_shield, enemy_hp, enemy_shields
         else:
-            return enemy_unit_name, air_dmg_to_hp, air_dmg_to_shield
+            return enemy_unit_name, air_dmg_to_hp, air_dmg_to_shield, enemy_hp, enemy_shields
     else:
         # Return damage against for ground/air based on enemy status
         if enemy_status == 'ground':
-            return enemy_unit_name, ground_dmg_to_hp, 0
+            return enemy_unit_name, ground_dmg_to_hp, 0, enemy_hp, 0
         else:
-            return enemy_unit_name, air_dmg_to_hp, 0
+            return enemy_unit_name, air_dmg_to_hp, 0, enemy_hp, 0
+
+
+def calculate_HTK(enemy_unit):
+    """
+    Enemy unit is a dataframe that should contain name, damage against hp/shields, hp/shields
+    :param enemy_unit: enemy unit to calculate HTK
+    :return: modified dataframe
+    """
+
+    htk = []
+
+    for unit in enemy_unit.itertuples(index=False, name='Unit'):
+        if unit[0] == 'Archon':
+            print()
+
+        hp_dmg = unit[1]
+        shield_dmg = unit[2]
+
+        hits = 0
+        shields_remaining = unit[4]
+        rem_damage = 0
+
+        # Calculate hits to deplete shields
+        while shields_remaining > 0:
+
+            # If more damage to shields than shields remaining, add as remainder
+            if (shield_dmg - shields_remaining) < 0:
+                rem_damage = abs(shield_dmg - shields_remaining)
+
+            shields_remaining -= shield_dmg
+            hits += 1
+
+        # If extra damage remains, reduce from hp
+        hp_remaining = unit[3]
+        if rem_damage > 0:
+            hp_remaining -= rem_damage
+
+        # Calculate hits to deplete hp
+        while hp_remaining > 0:
+            hp_remaining -= hp_dmg
+            hits += 1
+
+        htk.append(hits)
+
+    enemy_unit['Hits To Kill'] = pd.Series(data=htk)
+
+    return enemy_unit
