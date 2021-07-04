@@ -5,7 +5,6 @@ Hydralisk,M,10,10,1,1,E,E,80,0,0,0,no,ground
 Lurker,M,20,0,2,0,N,-,125,0,1,0,yes,ground
 Defiler,M,0,0,0,0,-,-,80,0,1,0,no,ground
 Ultralisk,L,20,0,3,0,N,-,400,0,1,0,no,ground
-Infested Terran,S,500,0,0,0,E,-,60,0,0,0,yes,ground
 Mutalisk,S,9,9,1,1,N,N,120,0,0,0,yes,air
 Scourge,S,0,110,0,0,-,N,25,0,0,0,no,air
 Guardian,L,20,0,2,0,N,-,150,0,2,0,no,air

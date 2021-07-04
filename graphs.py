@@ -14,6 +14,13 @@ CHART_HEIGHT = 550
 CHART_FONT_SIZE = 16
 CHART_LABEL_SIZE = 18
 
+OPT_DMG_CHART = 'Damage Charts'
+OPT_UNIT_DAMAGE = 'Unit Damage Dealt'
+OPT_UNIT_TAKEN = 'Unit Damage Taken'
+TERRAN_NAME = 'Terran'
+ZERG_NAME = 'Zerg'
+PROTOSS_NAME = 'Protoss'
+
 # Base function for drawing chart
 def draw_chart(unit_list, ga_choice, unit_size):
     # Set y axis field name based on ground and size option
@@ -150,14 +157,49 @@ def draw_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl
     st.altair_chart(altair_chart=unit_HTK_chart, use_container_width=True)
 
 
+def draw_damage_taken(curr_unit, enemy_unit_list, c_armor_level, e_weapon_level):
+    dmg_taken = damage.calculate_dmg_taken(curr_unit, enemy_unit_list, c_armor_level, e_weapon_level)
+
+    # Create graph
+    chart = alt.Chart(data=dmg_taken).mark_bar().encode(
+        x=alt.X(field='Unit Name', title='Enemy Unit Name', type='nominal'),
+        y=alt.Y(field='HP Damage Taken', title='HP Damage Taken From', type='quantitative'),
+    )
+
+    # Bar chart labels
+    text = chart.mark_text(
+        align='center',
+        baseline='middle',
+        dy=-5
+    ).encode(
+        text='HP Damage Taken'  # This has to match a column name
+    )
+
+    # Add base chart and text to layered chart for labels
+    damage_taken_chart = alt.layer(chart, text, data=dmg_taken).properties(
+        width=CHART_WIDTH,
+        height=CHART_HEIGHT
+    ).configure_axis(  # Need to run configure_axis() on last chart b/c of config issue
+        labelFontSize=CHART_LABEL_SIZE,
+        titleFontSize=CHART_FONT_SIZE
+    )
+
+    # Display chart to page
+    st.altair_chart(altair_chart=damage_taken_chart, use_container_width=True)
+
+
 # Used for debugging
 if __name__ == "__main__":
     terran_units, zerg_units, protoss_units, _ = loader.load_data()
     damage.process_damage(terran_units)
 
     # damage.process_damage(terran_units)
-    unit = zerg_units[zerg_units['Unit Name'] == 'Sunken Colony']
-    result = damage.unit_vs(unit, protoss_units, '0', '0', '2', True)
-    enemy_htk = damage.calculate_HTK(result)
+    unit = zerg_units[zerg_units['Unit Name'] == 'Zergling']
+    enemy_unit = protoss_units[protoss_units['Unit Name'] == 'Zealot']
+    # result = damage.unit_vs(unit, protoss_units, '0', '0', '2', True)
+    # enemy_htk = damage.calculate_HTK(result)
+    # print(enemy_htk)
 
-    print(enemy_htk)
+    result = damage.calculate_dmg_taken(unit, protoss_units, 0, 0)
+    print(result)
+

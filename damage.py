@@ -249,3 +249,70 @@ def calculate_HTK(enemy_unit):
     enemy_unit['Hits To Kill'] = pd.Series(data=htk)
 
     return enemy_unit
+
+
+def calculate_dmg_taken(curr_unit, enemy_units, curr_armor_level, enemy_weapon_level):
+    """
+    Calculates how much each enemy deals to selected unit
+    :param curr_unit: selected unit
+    :param enemy_units: enemy unit list
+    :param curr_armor_level: current armor level
+    :param enemy_weapon_level: enemy weapon level
+    :return:
+    """
+    curr_unit_status = curr_unit.iloc[0]['Status']
+    curr_armor = (curr_unit.iloc[0]['Armor'] + int(curr_armor_level))
+    curr_size = curr_unit.iloc[0]['Unit Size']
+    enemy_unit_list = enemy_units
+    damage_to_hp = []
+
+    # Filter out only units that can attack the selected unit
+    if curr_unit_status == 'ground':
+        # Need to make copy to avoid hidden chaining, also reset index to keep units in order
+        enemy_unit_list = enemy_unit_list[enemy_unit_list['Ground Attack'] > 0].copy()
+        attack_type_index = 6
+        attack_val_index = 2
+        attack_mod_index = 4
+    else:
+        enemy_unit_list = enemy_unit_list[enemy_unit_list['Air Attack'] > 0].copy()
+        attack_type_index = 7
+        attack_val_index = 3
+        attack_mod_index = 5
+
+    # Reset index to fix unit ordering
+    enemy_unit_list.reset_index(drop=True, inplace=True)
+
+    # Calculate damage dealt against unit
+    for e_unit in enemy_unit_list.itertuples(index=False, name='EnemyUnit'):
+        e_attack_type = e_unit[attack_type_index]
+        e_attack_val = e_unit[attack_val_index]
+        e_attack_mod = e_unit[attack_mod_index]
+        enemy_attack = e_attack_val + (e_attack_mod * int(enemy_weapon_level))
+        damage_taken = (enemy_attack - curr_armor)
+
+        # Apply size modifiers
+        if curr_size == 'S':
+            if e_attack_type == 'E':
+                damage_taken *= EXPLOSIVE_SMALL_MOD
+        elif curr_size == 'M':
+            if e_attack_type == 'E':
+                damage_taken *= EXPLOSIVE_MEDIUM_MOD
+            elif e_attack_type == 'C':
+                damage_taken *= CONCUSSIVE_MEDIUM_MOD
+        elif curr_size == 'L':
+            if e_attack_type == 'C':
+                damage_taken *= CONCUSSIVE_LARGE_MOD
+
+        damage_to_hp.append(damage_taken)
+        print(damage_taken)
+
+    enemy_unit_list['HP Damage Taken'] = pd.Series(data=damage_to_hp)
+
+    return enemy_unit_list
+
+
+
+
+
+
+
