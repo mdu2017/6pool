@@ -217,9 +217,6 @@ def calculate_HTK(enemy_unit):
     htk = []
 
     for unit in enemy_unit.itertuples(index=False, name='Unit'):
-        if unit[0] == 'Archon':
-            print()
-
         hp_dmg = unit[1]
         shield_dmg = unit[2]
 

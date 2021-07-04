@@ -125,7 +125,7 @@ def draw_HTK(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl
     # Create graph
     chart = alt.Chart(data=unit_HTK).mark_bar().encode(
         x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal'),
-        y=alt.Y(field='Hits To Kill', title='Damage to HP', type='quantitative'),
+        y=alt.Y(field='Hits To Kill', title='Hits to Kill', type='quantitative'),
     )
 
     # Bar chart labels
