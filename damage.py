@@ -231,8 +231,8 @@ def calculate_HTK(enemy_unit):
         while shields_remaining > 0:
 
             # If more damage to shields than shields remaining, add as remainder
-            if (shield_dmg - shields_remaining) < 0:
-                rem_damage = abs(shield_dmg - shields_remaining)
+            if (shields_remaining - shield_dmg) < 0:
+                rem_damage = abs(shields_remaining - shield_dmg)
 
             shields_remaining -= shield_dmg
             hits += 1

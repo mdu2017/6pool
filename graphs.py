@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     # damage.process_damage(terran_units)
     unit = zerg_units[zerg_units['Unit Name'] == 'Sunken Colony']
-    result = damage.unit_vs(unit, protoss_units, '0', '0', '0', True)
+    result = damage.unit_vs(unit, protoss_units, '0', '0', '2', True)
     enemy_htk = damage.calculate_HTK(result)
 
     print(enemy_htk)
