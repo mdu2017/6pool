@@ -1,9 +1,13 @@
 import csv
 import pandas as pd
+import streamlit as st
 
 """
 This file contains functions for loading and filtering the data
 """
+
+
+@st.cache(allow_output_mutation=True)
 def load_data():
     # Dataframes
     terran_units = pd.read_csv('./data/terran_units.csv', sep=',', header=0)
@@ -26,8 +30,8 @@ def load_data():
     return terran_units, zerg_units, protoss_units, all_units
 
 
+@st.cache
 def assign_unit_option(unit_race, terran_units, zerg_units, protoss_units):
-
     if unit_race == 'Terran':
         filtered_units = terran_units[(terran_units['Ground Attack'] > 0) | (terran_units['Air Attack'] > 0)]
     elif unit_race == 'Zerg':

@@ -4,6 +4,7 @@ File that handles damage calculations for various units
 
 import pandas as pd
 import math
+import streamlit as st
 
 # Modifiers for special damage types
 CONCUSSIVE_MEDIUM_MOD = 0.5
@@ -11,7 +12,7 @@ CONCUSSIVE_LARGE_MOD = 0.25
 EXPLOSIVE_SMALL_MOD = 0.5
 EXPLOSIVE_MEDIUM_MOD = 0.75
 
-
+@st.cache
 def process_damage(unit_list):
     """
     Process and return large dataframe with modified damages columns
@@ -71,9 +72,11 @@ def process_damage(unit_list):
     unit_list['Air vs Large'] = pd.Series(data=alarge)
 
 
+@st.cache(allow_output_mutation=True)
 def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl, is_protoss):
     """
     Calculate hits-to-kill for each unit in the list
+    :param is_protoss: checks if enemy unit is protoss for shield calculations
     :param e_shield_lvl: enemy shield upgrade level
     :param e_armor_lvl:  enemy armor upgrade level
     :param c_weapon_lvl: selected unit weapon level
@@ -111,16 +114,17 @@ def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl,
         enemy_hp.append(e_hp)
         enemy_shields.append(e_shields)
 
-    unit_vs = pd.DataFrame()
-    unit_vs['Enemy Unit Name'] = pd.Series(data=enemy_unit_names)
-    unit_vs['Damage To HP'] = pd.Series(data=damage_to_hp)
-    unit_vs['Damage To Shields'] = pd.Series(data=damage_to_shields)
-    unit_vs['HP'] = pd.Series(data=enemy_hp)
-    unit_vs['Shields'] = pd.Series(data=enemy_shields)
+    unit_vs_df = pd.DataFrame()
+    unit_vs_df['Enemy Unit Name'] = pd.Series(data=enemy_unit_names)
+    unit_vs_df['Damage To HP'] = pd.Series(data=damage_to_hp)
+    unit_vs_df['Damage To Shields'] = pd.Series(data=damage_to_shields)
+    unit_vs_df['HP'] = pd.Series(data=enemy_hp)
+    unit_vs_df['Shields'] = pd.Series(data=enemy_shields)
 
-    return unit_vs
+    return unit_vs_df
 
 
+@st.cache
 def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, enemy_shield_level, is_protoss):
     """
     Calculates damages against another unit
@@ -207,16 +211,17 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
             return enemy_unit_name, air_dmg_to_hp, 0, enemy_hp, 0
 
 
-def calculate_HTK(enemy_unit):
+@st.cache
+def calculate_HTK(enemy_unit_list):
     """
-    Enemy unit is a dataframe that should contain name, damage against hp/shields, hp/shields
-    :param enemy_unit: enemy unit to calculate HTK
+    Enemy unit is a dataframe that should contain name, damage against hp/shields, hp/shields for all enemy units
+    :param enemy_unit_list: enemy unit to calculate HTK
     :return: modified dataframe
     """
 
     htk = []
 
-    for unit in enemy_unit.itertuples(index=False, name='Unit'):
+    for unit in enemy_unit_list.itertuples(index=False, name='Unit'):
         hp_dmg = unit[1]
         shield_dmg = unit[2]
 
@@ -246,11 +251,14 @@ def calculate_HTK(enemy_unit):
 
         htk.append(hits)
 
-    enemy_unit['Hits To Kill'] = pd.Series(data=htk)
+    # Make copy of unit_vs dataframe
+    enemy_units_modified = enemy_unit_list.copy()
+    enemy_units_modified['Hits To Kill'] = pd.Series(data=htk)
 
-    return enemy_unit
+    return enemy_units_modified
 
 
+@st.cache
 def calculate_dmg_taken(curr_unit, enemy_units, curr_armor_level, enemy_weapon_level):
     """
     Calculates how much each enemy deals to selected unit
@@ -304,7 +312,6 @@ def calculate_dmg_taken(curr_unit, enemy_units, curr_armor_level, enemy_weapon_l
                 damage_taken *= CONCUSSIVE_LARGE_MOD
 
         damage_to_hp.append(damage_taken)
-        print(damage_taken)
 
     enemy_unit_list['HP Damage Taken'] = pd.Series(data=damage_to_hp)
 
