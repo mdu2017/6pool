@@ -12,6 +12,10 @@ CONCUSSIVE_LARGE_MOD = 0.25
 EXPLOSIVE_SMALL_MOD = 0.5
 EXPLOSIVE_MEDIUM_MOD = 0.75
 
+# Special structures - armor mod should be 0
+struct_0 = {'Missile Turret', 'Spore Colony', 'Photon Cannon'}
+struct_2 = {'Sunken Colony'}
+
 @st.cache
 def process_damage(unit_list):
     """
@@ -120,6 +124,7 @@ def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl,
     unit_vs_df['Damage To Shields'] = pd.Series(data=damage_to_shields)
     unit_vs_df['HP'] = pd.Series(data=enemy_hp)
     unit_vs_df['Shields'] = pd.Series(data=enemy_shields)
+    unit_vs_df['Status'] = pd.Series(data=enemy_unit_list['Status'])
 
     return unit_vs_df
 
@@ -148,8 +153,13 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
     unit_ga_value = curr_unit.iloc[0]['Ground Attack']
     unit_aa_value = curr_unit.iloc[0]['Air Attack']
 
-    # Enemy armor value
-    enemy_armor_value = (enemy_armor + enemy_armor_level)
+    # Enemy armor value - Check for structure armor
+    if enemy_unit_name in struct_0:
+        enemy_armor_value = 0
+    elif enemy_unit_name in struct_2:
+        enemy_armor_value = 2
+    else:
+        enemy_armor_value = (enemy_armor + enemy_armor_level)
 
     # NOTE: ARMOR is factored in first, THEN unit size modifiers
     #  ex: (22 damage - 1 armor) * 0.5 damage
@@ -212,7 +222,7 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
 
 
 @st.cache
-def calculate_HTK(enemy_unit_list):
+def calculate_HTK(curr_unit, enemy_unit_list):
     """
     Enemy unit is a dataframe that should contain name, damage against hp/shields, hp/shields for all enemy units
     :param enemy_unit_list: enemy unit to calculate HTK
@@ -221,7 +231,31 @@ def calculate_HTK(enemy_unit_list):
 
     htk = []
 
+    # Handle special damage calculations for units with multihits
+    curr_unit_name = curr_unit.iloc[0]['Unit Name']
+    if curr_unit_name == 'Zealot':
+        num_atks = 2
+    elif curr_unit.iloc[0]['Unit Name'] == 'Valkyrie':
+        num_atks = 8
+    else:
+        num_atks = 1
+
     for unit in enemy_unit_list.itertuples(index=False, name='Unit'):
+
+        # [0]=unit name, [1]hp dmg, [2]=shield dmg, [3]=hp, [4]=shields, [5]=status
+        # Check for special damage calculations for units with multi-hits
+        enemy_status = unit[5]
+        num_atks = 1
+
+        if enemy_status == 'air':
+            if curr_unit_name == 'Scout' or curr_unit_name == 'Goliath':
+                num_atks = 2
+
+        if curr_unit_name == 'Zealot':
+            num_atks = 2
+        if curr_unit_name == 'Valkyrie':
+            num_atks = 8
+
         hp_dmg = unit[1]
         shield_dmg = unit[2]
 
@@ -236,7 +270,7 @@ def calculate_HTK(enemy_unit_list):
             if (shields_remaining - shield_dmg) < 0:
                 rem_damage = abs(shields_remaining - shield_dmg)
 
-            shields_remaining -= shield_dmg
+            shields_remaining -= (shield_dmg * num_atks)
             hits += 1
 
         # If extra damage remains, reduce from hp
@@ -246,7 +280,7 @@ def calculate_HTK(enemy_unit_list):
 
         # Calculate hits to deplete hp
         while hp_remaining > 0:
-            hp_remaining -= hp_dmg
+            hp_remaining -= (hp_dmg * num_atks)
             hits += 1
 
         htk.append(hits)
@@ -268,8 +302,17 @@ def calculate_dmg_taken(curr_unit, enemy_units, curr_armor_level, enemy_weapon_l
     :param enemy_weapon_level: enemy weapon level
     :return:
     """
+    curr_unit_name = curr_unit.iloc[0]['Unit Name']
+
+    # Check if structure
+    if curr_unit_name in struct_0:
+        curr_armor = 0
+    elif curr_unit_name in struct_2:
+        curr_armor = 2
+    else:
+        curr_armor = (curr_unit.iloc[0]['Armor'] + int(curr_armor_level))
+
     curr_unit_status = curr_unit.iloc[0]['Status']
-    curr_armor = (curr_unit.iloc[0]['Armor'] + int(curr_armor_level))
     curr_size = curr_unit.iloc[0]['Unit Size']
     enemy_unit_list = enemy_units
     damage_to_hp = []

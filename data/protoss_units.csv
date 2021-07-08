@@ -1,6 +1,6 @@
 Unit Name,Unit Size,Ground Attack,Air Attack,Ground Attack Mod,Air Attack Mod,Ground Attack Type,Air Attack Type,HP,Shields,Armor,Shield Armor,Splash Damage,Status
 Probe,S,5,0,0,0,N,-,20,20,0,0,no,ground
-Zealot,S,16,0,2,0,N,-,100,60,1,0,no,ground
+Zealot,S,8,0,1,0,N,-,100,60,1,0,no,ground
 Dragoon,L,20,20,2,2,E,E,100,80,1,0,no,ground
 High Templar,S,0,0,0,0,-,-,40,40,0,0,no,ground
 Dark Templar,S,40,0,0,0,N,-,80,40,1,0,no,ground
@@ -9,7 +9,7 @@ Dark Archon,L,0,0,0,0,-,-,25,200,1,0,no,ground
 Reaver,L,100,0,0,0,N,-,100,80,0,0,yes,ground
 Shuttle,L,0,0,0,0,-,-,80,60,1,0,no,air
 Observer,S,0,0,0,0,-,-,40,20,0,0,no,air
-Scout,L,8,28,1,2,N,E,150,100,0,0,no,air
+Scout,L,8,14,1,1,N,E,150,100,0,0,no,air
 Corsair,M,0,5,0,1,-,E,100,80,1,0,yes,air
 Carrier,L,6,6,1,1,N,N,300,150,4,0,no,air
 Arbiter,L,10,10,1,1,E,E,200,150,1,0,no,air

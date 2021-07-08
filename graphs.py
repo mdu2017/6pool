@@ -187,16 +187,16 @@ def draw_damage_taken(curr_unit, enemy_unit_list, c_armor_level, e_weapon_level)
 
 
 # Used for debugging
-# if __name__ == "__main__":
-#     terran_units, zerg_units, protoss_units, _ = loader.load_data()
-#     damage.process_damage(terran_units)
-#
-#     # damage.process_damage(terran_units)
-#     unit = zerg_units[zerg_units['Unit Name'] == 'Zergling']
-#     enemy_unit = protoss_units[protoss_units['Unit Name'] == 'Zealot']
-#     result = damage.unit_vs(unit, protoss_units, '0', '0', '2', True)
-#     enemy_htk = damage.calculate_HTK(result)
-#     print(enemy_htk)
-#
-#     result = damage.calculate_dmg_taken(unit, protoss_units, 0, 0)
-#     print(result)
+if __name__ == "__main__":
+    terran_units, zerg_units, protoss_units, _ = loader.load_data()
+    # damage.process_damage(terran_units)
+
+    # damage.process_damage(terran_units)
+    curr_unit = protoss_units[protoss_units['Unit Name'] == 'Zealot']
+    # enemy_unit = protoss_units[protoss_units['Unit Name'] == 'Zealot']
+    unit_vs = damage.unit_vs(curr_unit, zerg_units, 0, 3, 0, False)
+    # print(unit_vs)
+    enemy_htk = damage.calculate_HTK(curr_unit, unit_vs)
+
+    pd.set_option('display.max_columns', None)
+    print(enemy_htk)

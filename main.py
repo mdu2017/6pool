@@ -77,8 +77,10 @@ if __name__ == '__main__':
         elif selected_unit_race == 'Protoss':
             graphs.draw_chart(protoss_units, ga_choice, unit_size_choice)
 
+            if ga_choice == 'Ground':
+                st.info('Zealots do 2 attacks for a total of 8 (x2) damage')
             if ga_choice == 'Air':
-                st.info('Note: Carriers can build up to 8 interceptors dealing 6 (x8) damage')
+                st.info('''Note: Carriers can build up to 8 interceptors dealing 6 (x8) damage.''')
 
     # Unit damage dealt chart mode
     else:
@@ -125,7 +127,7 @@ if __name__ == '__main__':
             # Processed damage list for enemy list
             unit_vs = damage.unit_vs(curr_unit, enemy_list,
                                      curr_weapon_level, enemy_armor_level, enemy_shield_level, is_protoss)
-            unit_HTK = damage.calculate_HTK(unit_vs)
+            unit_HTK = damage.calculate_HTK(curr_unit, unit_vs)
             shield_note = 'Note: Protoss shields will take full damage from any attack, regardless of size'
 
 
