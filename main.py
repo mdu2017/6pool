@@ -154,7 +154,7 @@ if __name__ == '__main__':
                 )
             e_weapon_level = st.sidebar.select_slider(label='Enemy weapon upgrade level', options=['0', '1', '2', '3'])
 
-            st.subheader(f'{unit_selected} damage taken from {selected_unit_race} units')
+            st.subheader(f'{unit_selected} damage taken from {enemy_unit_race} units')
 
             graphs.draw_damage_taken(curr_unit, enemy_list, c_armor_level, e_weapon_level)
             st.info('Note: Protoss Shields take full damage from all attack types')
