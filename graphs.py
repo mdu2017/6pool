@@ -14,6 +14,10 @@ CHART_HEIGHT = 550
 CHART_FONT_SIZE = 16
 CHART_LABEL_SIZE = 18
 
+BAR_COLOR = '#82CEB7'
+BAR_HIGHLIGHT_COLOR = 'coral'
+GRAPH_TEXT_COLOR = '#FFFFFF'
+
 OPT_DMG_CHART = 'Unit Damage Charts'
 OPT_UNIT_DAMAGE = 'Unit Damage Dealt'
 OPT_UNIT_TAKEN = 'Unit Damage Taken'
@@ -58,31 +62,36 @@ def draw_chart(unit_list, ga_choice, unit_size, sort_opt):
     # Set filters (remove all zero value attack units)
     field_predicate = alt.FieldGTPredicate(field=field_name, gt=1)
 
-    # Create damage chart
+    # Create base chart with data
     chart = alt.Chart(data=unit_list).mark_bar().encode(
         # Sort needs to be done on x-axis (the axis being sorted), by y value
         x=alt.X(field='Unit Name', title='Unit Name', type='nominal', sort=sort_opt),
         y=alt.Y(field=field_name, title=title, type='quantitative'),
-        color=alt.condition(
-            alt.FieldOneOfPredicate(field='Unit Name', oneOf=structures),
-            alt.value('coral'),  # which sets the bar orange.
-            alt.value('steelblue')  # And if it's not true it sets the bar steelblue.
-        )
     ).transform_filter(
         field_predicate
     )
 
-    # Bar chart labels
+    # Set options for the bars
+    bars = chart.mark_bar().encode(
+        color=alt.condition(
+            alt.FieldOneOfPredicate(field='Unit Name', oneOf=structures),
+            alt.value(BAR_HIGHLIGHT_COLOR),  # which sets the bar orange.
+            alt.value(BAR_COLOR)  # otherwise, sets bar to selected color (bluish)
+        )
+    )
+
+    # Text labels for bar
     text = chart.mark_text(
         align='center',
         baseline='middle',
-        dy=-5
+        dy=-5,
+        color=GRAPH_TEXT_COLOR
     ).encode(
         text=field_name  # This has to match a column name
     )
 
     # Add base chart and text to layered chart for labels
-    my_chart = alt.layer(chart, text, data=unit_list).properties(
+    my_chart = alt.layer(chart, bars, text, data=unit_list).properties(
         width=CHART_WIDTH,
         height=CHART_HEIGHT
     ).configure_axis(  # Need to run configure_axis() on last chart b/c of config issue
@@ -104,7 +113,9 @@ def draw_unit_vs(unit_vs_data, sort_opt):
     """
 
     # Create graph
-    chart = alt.Chart(data=unit_vs_data).mark_bar().encode(
+    chart = alt.Chart(data=unit_vs_data).mark_bar(
+        color=BAR_COLOR
+    ).encode(
         x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal', sort=sort_opt),
         y=alt.Y(field='Damage To HP', title='Damage to HP', type='quantitative'),
     )
@@ -113,7 +124,8 @@ def draw_unit_vs(unit_vs_data, sort_opt):
     text = chart.mark_text(
         align='center',
         baseline='middle',
-        dy=-5
+        dy=-5,
+        color=GRAPH_TEXT_COLOR
     ).encode(
         text='Damage To HP'  # This has to match a column name
     )
@@ -140,7 +152,9 @@ def draw_HTK(htk_data, sort_opt):
     """
 
     # Create graph
-    chart = alt.Chart(data=htk_data).mark_bar().encode(
+    chart = alt.Chart(data=htk_data).mark_bar(
+        color=BAR_COLOR
+    ).encode(
         x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal', sort=sort_opt),
         y=alt.Y(field='Hits To Kill', title='Hits to Kill', type='quantitative'),
     )
@@ -149,7 +163,8 @@ def draw_HTK(htk_data, sort_opt):
     text = chart.mark_text(
         align='center',
         baseline='middle',
-        dy=-5
+        dy=-5,
+        color=GRAPH_TEXT_COLOR
     ).encode(
         text='Hits To Kill'  # This has to match a column name
     )
@@ -180,7 +195,9 @@ def draw_damage_taken(curr_unit, enemy_unit_list, c_armor_level, e_weapon_level,
     dmg_taken = damage.calculate_dmg_taken(curr_unit, enemy_unit_list, c_armor_level, e_weapon_level)
 
     # Create graph
-    chart = alt.Chart(data=dmg_taken).mark_bar().encode(
+    chart = alt.Chart(data=dmg_taken).mark_bar(
+        color=BAR_COLOR
+    ).encode(
         x=alt.X(field='Unit Name', title='Enemy Unit Name', type='nominal', sort=sort_opt),
         y=alt.Y(field='HP Damage Taken', title='HP Damage Taken From', type='quantitative'),
     )
@@ -189,7 +206,8 @@ def draw_damage_taken(curr_unit, enemy_unit_list, c_armor_level, e_weapon_level,
     text = chart.mark_text(
         align='center',
         baseline='middle',
-        dy=-5
+        dy=-5,
+        color=GRAPH_TEXT_COLOR
     ).encode(
         text='HP Damage Taken'  # This has to match a column name
     )
