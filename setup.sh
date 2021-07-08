@@ -8,7 +8,10 @@ email = \"2017mark@gmail.com\"\n\
 echo "\
 [theme]\n\
 base = \"dark\"\n\
-textColor = \"#fffbf5\"\n\
+primaryColor = \"#F63366\"\n\
+backgroundColor = \"#0E1117\"\n\
+secondaryBackgroundColor = \"#31333F\"\n\
+textColor = \"#FAFAFA\"\n\
 font = \"serif\"\n\
 " > ~/.streamlit/config.toml
 
