@@ -32,18 +32,29 @@ if __name__ == '__main__':
         help='Displays info table for all units'
     )
 
+    # Display unit info box
+    if display_unit_info:
+        st.write(all_units)
+
     # Sidebar choice option for unit race
     selected_unit_race = st.sidebar.radio(
         label='Select Unit Race',
         options=['Terran', 'Zerg', 'Protoss'])
 
-    # Display unit info box
-    if display_unit_info:
-        st.write(all_units)
+    # Sort option
+    sort_opt = st.sidebar.radio(label='Sort By:', options=['Increasing', 'Decreasing'])
+    if sort_opt == 'Increasing':
+        sort_y = 'y'
+    else:
+        sort_y = '-y'
+
+    st.title('Starcraft Unit Damage Statistics')
+
+    # Chart mode title
+    st.subheader(chart_mode)
 
     # Damage Charts mode
     if chart_mode == OPT_DMG_CHART:
-        st.title('Starcraft Unit Damage Charts')
 
         # Display ground/air options
         ga_choice = st.radio(
@@ -59,15 +70,16 @@ if __name__ == '__main__':
 
         # Generate damage charts for terran units
         if selected_unit_race == 'Terran':
-            graphs.draw_chart(terran_units, ga_choice, unit_size_choice)
+            graphs.draw_chart(terran_units, ga_choice, unit_size_choice, sort_y)
 
             # Note for special terran units
             if ga_choice == 'Air':
                 st.info('Note: Valkyries shoot 2 groups of 4 missiles for a total of 6 (x8) damage')
+                st.info('Note: Goliaths shoot 2 missile for a total of 10 (x2) damage')
 
         # Charts for zerg units
         elif selected_unit_race == 'Zerg':
-            graphs.draw_chart(zerg_units, ga_choice, unit_size_choice)
+            graphs.draw_chart(zerg_units, ga_choice, unit_size_choice, sort_y)
 
             # Note for special zerg units
             if ga_choice == 'Ground':
@@ -75,12 +87,13 @@ if __name__ == '__main__':
 
         # Charts for protoss units
         elif selected_unit_race == 'Protoss':
-            graphs.draw_chart(protoss_units, ga_choice, unit_size_choice)
+            graphs.draw_chart(protoss_units, ga_choice, unit_size_choice, sort_y)
 
             if ga_choice == 'Ground':
-                st.info('Zealots do 2 attacks for a total of 8 (x2) damage')
+                st.info('Zealots hit twice for a total of 8 (x2) damage')
             if ga_choice == 'Air':
                 st.info('''Note: Carriers can build up to 8 interceptors dealing 6 (x8) damage.''')
+                st.info('Note: Scouts hit twice for a total of 14 (x2) damage')
 
     # Unit damage dealt chart mode
     else:
@@ -107,7 +120,6 @@ if __name__ == '__main__':
             htk_note = 'Note: Protoss units have shield regeneration, which may affect these numbers'
 
         if chart_mode == OPT_UNIT_DAMAGE:
-            st.title('Unit Damage Dealt')
 
             # Selected weapon and armor upgrade levels
             curr_weapon_level = st.sidebar.select_slider(label='Weapon upgrade level', options=['0', '1', '2', '3'])
@@ -136,15 +148,13 @@ if __name__ == '__main__':
 
             # Draw graph for selected mode
             if chart_option == 'Damage Against':
-                graphs.draw_unit_vs(unit_vs)
+                graphs.draw_unit_vs(unit_vs, sort_y)
                 st.info(shield_note)
             elif chart_option == 'Hits to Kill':
-                graphs.draw_HTK(unit_HTK)
+                graphs.draw_HTK(unit_HTK, sort_y)
                 st.info(htk_note)
 
         elif chart_mode == OPT_UNIT_TAKEN:
-
-            st.title('Unit Damage Taken')
 
             # Selected weapon and armor upgrade levels
             c_armor_level = st.sidebar.select_slider(label='Selected unit armor level', options=['0', '1', '2', '3'])
@@ -156,6 +166,6 @@ if __name__ == '__main__':
 
             st.subheader(f'{unit_selected} damage taken from {enemy_unit_race} units')
 
-            graphs.draw_damage_taken(curr_unit, enemy_list, c_armor_level, e_weapon_level)
+            graphs.draw_damage_taken(curr_unit, enemy_list, c_armor_level, e_weapon_level, sort_y)
             st.info('Note: Protoss Shields take full damage from all attack types')
 
