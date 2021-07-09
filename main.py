@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     # Display unit info table - checkbox
     display_unit_info = st.sidebar.checkbox(
-        label='Display unit info',
+        label='Display all unit info',
         help='Displays info table for all units'
     )
 
@@ -63,10 +63,12 @@ if __name__ == '__main__':
         )
 
         # Unit size option
-        unit_size_choice = st.select_slider(
-            label=f'Select Enemy Unit Size - Damage Against',
+        unit_size_choice = st.radio(
+            label=f'Select Enemy Unit Size',
             options=['Base', 'Small', 'Medium', 'Large']
         )
+
+        st.subheader(f'Damage Against {ga_choice} units')
 
         # Generate damage charts for terran units
         if selected_unit_race == 'Terran':
@@ -141,7 +143,6 @@ if __name__ == '__main__':
                                      curr_weapon_level, enemy_armor_level, enemy_shield_level, is_protoss)
             unit_HTK = damage.calculate_HTK(curr_unit, unit_vs)
             shield_note = 'Note: Protoss shields will take full damage from any attack, regardless of size'
-
 
             # Display graphs
             st.subheader(f'{unit_selected} vs {enemy_unit_race} Units')

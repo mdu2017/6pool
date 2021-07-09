@@ -107,9 +107,13 @@ def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl,
     enemy_hp = []
     enemy_shields = []
 
+    # Determines if unit is "effective against another" as colors (red, gold/khaki, yellowgreen, green)
+    is_effective = []
+
+
     # Calculate damage against enemy unit and create lists for each stat
     for enemy_unit in enemy_units.itertuples(index=False, name='Unit'):
-        enemy_name, damage_to_h, damage_to_s, e_hp, e_shields = calculate_dmg(curr_unit, int(c_weapon_lvl),
+        enemy_name, damage_to_h, damage_to_s, e_hp, e_shields, effective = calculate_dmg(curr_unit, int(c_weapon_lvl),
                                                                               enemy_unit, int(e_armor_lvl),
                                                                               int(e_shield_lvl), is_protoss)
         enemy_unit_names.append(enemy_name)
@@ -117,6 +121,7 @@ def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl,
         damage_to_shields.append(damage_to_s)
         enemy_hp.append(e_hp)
         enemy_shields.append(e_shields)
+        is_effective.append(effective)
 
     unit_vs_df = pd.DataFrame()
     unit_vs_df['Enemy Unit Name'] = pd.Series(data=enemy_unit_names)
@@ -125,6 +130,7 @@ def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl,
     unit_vs_df['HP'] = pd.Series(data=enemy_hp)
     unit_vs_df['Shields'] = pd.Series(data=enemy_shields)
     unit_vs_df['Status'] = pd.Series(data=enemy_unit_list['Status'])
+    unit_vs_df['Color'] = pd.Series(data=is_effective)
 
     return unit_vs_df
 
@@ -148,6 +154,9 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
     enemy_hp = enemy_unit[8]
     enemy_armor = enemy_unit[10]
     enemy_status = enemy_unit[13]
+
+    ga_effective = 'steelblue'
+    aa_effective = 'steelblue'
 
     # Calculate ground and air damage with upgrades
     unit_ga_value = curr_unit.iloc[0]['Ground Attack']
@@ -174,13 +183,22 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
         if aa_type == 'C':
             if enemy_unit_size == 'M':
                 air_dmg_to_hp *= CONCUSSIVE_MEDIUM_MOD
+                aa_effective = 'gold'
             elif enemy_unit_size == 'L':
                 air_dmg_to_hp *= CONCUSSIVE_LARGE_MOD
+                aa_effective = 'red'
+            else:
+                aa_effective = 'green'
+
         if aa_type == 'E':
             if enemy_unit_size == 'S':
                 air_dmg_to_hp *= EXPLOSIVE_SMALL_MOD
+                aa_effective = 'gold'
             elif enemy_unit_size == 'M':
                 air_dmg_to_hp *= EXPLOSIVE_MEDIUM_MOD
+                aa_effective = 'yellowgreen'
+            else:
+                aa_effective = 'green'
 
     if unit_ga_value != 0:
         ga_type = curr_unit.iloc[0]['Ground Attack Type']
@@ -191,13 +209,21 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
         if ga_type == 'C':
             if enemy_unit_size == 'M':
                 ground_dmg_to_hp *= CONCUSSIVE_MEDIUM_MOD
+                ga_effective = 'gold'
             elif enemy_unit_size == 'L':
                 ground_dmg_to_hp *= CONCUSSIVE_LARGE_MOD
+                ga_effective = 'red'
+            else:
+                ga_effective = 'green'
         if ga_type == 'E':
             if enemy_unit_size == 'S':
                 ground_dmg_to_hp *= EXPLOSIVE_SMALL_MOD
+                ga_effective = 'gold'
             elif enemy_unit_size == 'M':
                 ground_dmg_to_hp *= EXPLOSIVE_MEDIUM_MOD
+                ga_effective = 'yellowgreen'
+            else:
+                ga_effective = 'green'
 
     # Do shield calculations if protoss
     if is_protoss:
@@ -209,16 +235,17 @@ def calculate_dmg(curr_unit, curr_weapon_level, enemy_unit, enemy_armor_level, e
         if unit_aa_value != 0:
             air_dmg_to_shield = (unit_admg - enemy_shield_value)
 
+        # Return ground/air stats for a protoss unit
         if enemy_status == 'ground':
-            return enemy_unit_name, ground_dmg_to_hp, ground_dmg_to_shield, enemy_hp, enemy_shields
+            return enemy_unit_name, ground_dmg_to_hp, ground_dmg_to_shield, enemy_hp, enemy_shields, ga_effective
         else:
-            return enemy_unit_name, air_dmg_to_hp, air_dmg_to_shield, enemy_hp, enemy_shields
+            return enemy_unit_name, air_dmg_to_hp, air_dmg_to_shield, enemy_hp, enemy_shields, aa_effective
     else:
         # Return damage against for ground/air based on enemy status
         if enemy_status == 'ground':
-            return enemy_unit_name, ground_dmg_to_hp, 0, enemy_hp, 0
+            return enemy_unit_name, ground_dmg_to_hp, 0, enemy_hp, 0, ga_effective
         else:
-            return enemy_unit_name, air_dmg_to_hp, 0, enemy_hp, 0
+            return enemy_unit_name, air_dmg_to_hp, 0, enemy_hp, 0, aa_effective
 
 
 @st.cache

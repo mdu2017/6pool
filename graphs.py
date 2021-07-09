@@ -14,9 +14,11 @@ CHART_HEIGHT = 550
 CHART_FONT_SIZE = 16
 CHART_LABEL_SIZE = 18
 
-BAR_COLOR = '#82CEB7'
+BAR_COLOR = 'steelblue'
+# BAR_COLOR = '#82CEB7'
 BAR_HIGHLIGHT_COLOR = 'coral'
-GRAPH_TEXT_COLOR = '#FFFFFF'
+# GRAPH_TEXT_COLOR = '#FFFFFF'
+GRAPH_TEXT_COLOR = '#000000'
 
 OPT_DMG_CHART = 'Unit Damage Charts'
 OPT_UNIT_DAMAGE = 'Unit Damage Dealt'
@@ -38,6 +40,7 @@ def draw_chart(unit_list, ga_choice, unit_size, sort_opt):
     :param sort_opt: sorting filter
     :return: graph of unit damages
     """
+
     # Set y axis field name based on ground and size option
     if ga_choice == 'Ground':
         title = 'Ground Attack Value'
@@ -112,12 +115,20 @@ def draw_unit_vs(unit_vs_data, sort_opt):
     :return: graph for unit vs
     """
 
+    # sort_col = unit_vs_data['Damage To HP'].values.tolist()
+    # sort_col.sort(reverse=True)
+
     # Create graph
-    chart = alt.Chart(data=unit_vs_data).mark_bar(
-        color=BAR_COLOR
-    ).encode(
+    chart = alt.Chart(data=unit_vs_data).mark_bar().encode(
         x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal', sort=sort_opt),
         y=alt.Y(field='Damage To HP', title='Damage to HP', type='quantitative'),
+    )
+
+    # Bars
+    # TODO: bug with sorting values if color column is used
+    bars = chart.mark_bar().encode(
+        # color=alt.Color(field='Color', type='nominal')
+        color=alt.Color(field='Color', type='nominal', scale=None)
     )
 
     # Bar chart labels
@@ -131,7 +142,7 @@ def draw_unit_vs(unit_vs_data, sort_opt):
     )
 
     # Add base chart and text to layered chart for labels
-    unit_vs_chart = alt.layer(chart, text, data=unit_vs_data).properties(
+    unit_vs_chart = alt.layer(chart, bars, text, data=unit_vs_data).properties(
         width=CHART_WIDTH,
         height=CHART_HEIGHT
     ).configure_axis(  # Need to run configure_axis() on last chart b/c of config issue
@@ -152,11 +163,15 @@ def draw_HTK(htk_data, sort_opt):
     """
 
     # Create graph
-    chart = alt.Chart(data=htk_data).mark_bar(
-        color=BAR_COLOR
-    ).encode(
+    chart = alt.Chart(data=htk_data).mark_bar().encode(
         x=alt.X(field='Enemy Unit Name', title='Enemy Unit Name', type='nominal', sort=sort_opt),
         y=alt.Y(field='Hits To Kill', title='Hits to Kill', type='quantitative'),
+    )
+
+    # Bars
+    # TODO: bug with sorting -> also if scale is used, colors are wrong
+    bars = chart.mark_bar().encode(
+        color=alt.Color(field='Color', type='nominal', scale=None)
     )
 
     # Bar chart labels
@@ -170,7 +185,7 @@ def draw_HTK(htk_data, sort_opt):
     )
 
     # Add base chart and text to layered chart for labels
-    unit_HTK_chart = alt.layer(chart, text, data=htk_data).properties(
+    unit_HTK_chart = alt.layer(chart, bars, text, data=htk_data).properties(
         width=CHART_WIDTH,
         height=CHART_HEIGHT
     ).configure_axis(  # Need to run configure_axis() on last chart b/c of config issue
