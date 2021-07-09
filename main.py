@@ -142,6 +142,9 @@ if __name__ == '__main__':
             unit_vs = damage.unit_vs(curr_unit, enemy_list,
                                      curr_weapon_level, enemy_armor_level, enemy_shield_level, is_protoss)
             unit_HTK = damage.calculate_HTK(curr_unit, unit_vs)
+
+            loader.append_size_suffix(unit_vs, 'Enemy Unit Name')
+            loader.append_size_suffix(unit_HTK, 'Enemy Unit Name')
             shield_note = 'Note: Protoss shields will take full damage from any attack, regardless of size'
 
             # Display graphs
@@ -167,6 +170,9 @@ if __name__ == '__main__':
 
             st.subheader(f'{unit_selected} damage taken from {enemy_unit_race} units')
 
-            graphs.draw_damage_taken(curr_unit, enemy_list, c_armor_level, e_weapon_level, sort_y)
+            # Processed dataframe with damage taken values
+            dmg_taken = damage.calculate_dmg_taken(curr_unit, enemy_list, c_armor_level, e_weapon_level)
+
+            graphs.draw_damage_taken(dmg_taken, sort_y)
             st.info('Note: Protoss Shields take full damage from all attack types')
 

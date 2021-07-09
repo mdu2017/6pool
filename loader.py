@@ -27,6 +27,10 @@ def load_data():
         copy=True,
     )
 
+    terran_units['Unit Names'] = terran_units['Unit Name'] + ' (' + terran_units['Unit Size'] + ')'
+    zerg_units['Unit Names'] = zerg_units['Unit Name'] + ' (' + zerg_units['Unit Size'] + ')'
+    protoss_units['Unit Names'] = protoss_units['Unit Name'] + ' (' + protoss_units['Unit Size'] + ')'
+
     return terran_units, zerg_units, protoss_units, all_units
 
 
@@ -43,3 +47,7 @@ def assign_unit_option(unit_race, terran_units, zerg_units, protoss_units):
     options = filtered_units['Unit Name']
 
     return filtered_units, options
+
+
+def append_size_suffix(df, column_name):
+    df['Unit Names'] = df[column_name] + ' (' + df['Unit Size'] + ')'

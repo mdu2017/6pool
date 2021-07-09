@@ -131,6 +131,7 @@ def unit_vs(curr_unit, enemy_unit_list, c_weapon_lvl, e_armor_lvl, e_shield_lvl,
     unit_vs_df['Shields'] = pd.Series(data=enemy_shields)
     unit_vs_df['Status'] = pd.Series(data=enemy_unit_list['Status'])
     unit_vs_df['Color'] = pd.Series(data=is_effective)
+    unit_vs_df['Unit Size'] = pd.Series(data=enemy_unit_list['Unit Size'])
 
     return unit_vs_df
 
