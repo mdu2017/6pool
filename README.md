@@ -7,6 +7,7 @@ The website link can be found here: https://starcraft-damage-charts.herokuapp.co
 
 # General Description
 Built using Streamlit, Python 3, Altair
+The website is hosted using the Heroku platform.
 
 # Libraries used
 - streamlit 0.83.0
